@@ -32,6 +32,8 @@ class Command
      */
     public $useExec = false;
 
+    public $usePopen = false;
+
     /**
      * @var bool whether to capture stderr (2>&1) when `useExec` is true. This will try to redirect the
      * stderr to stdout and provide the complete output of both in `getStdErr()` and `getError()`.
@@ -297,6 +299,13 @@ class Command
                 $this->_error = empty($this->_stdErr) ? 'Command failed' : $this->_stdErr;
                 return false;
             }
+        } elseif ($this->usePopen) {
+            // "real time" output
+            $handle = popen($command, 'r');
+            while (!feof($handle)) {
+                echo fgets($handle);
+            }
+            pclose($handle);
         } else {
             $descriptors = array(
                 1   => array('pipe','w'),
